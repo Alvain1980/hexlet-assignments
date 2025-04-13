@@ -41,15 +41,11 @@ public class Application {
     }
 
     @GetMapping("/posts/{id}") //просмотр конкретного поста
-    public ResponseEntity<Optional<Post>> show(@PathVariable String id) {
+    public ResponseEntity<Post> show(@PathVariable String id) {
         var result = posts.stream()
                 .filter(p -> p.getId().equals(id))
                 .findFirst();
-        if (result.isPresent()) {
-            return ResponseEntity.ok().body(result);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        return ResponseEntity.of(result);
     }
 
     @PostMapping("/posts") //создание нового поста
@@ -59,19 +55,19 @@ public class Application {
     }
 
     @PutMapping("/posts/{id}") //обновление поста
-    public ResponseEntity<Optional<Post>> update(@PathVariable String id, @RequestBody Post data) {
+    public ResponseEntity<Post> update(@PathVariable String id, @RequestBody Post data) {
         var maybePost = posts.stream()
                 .filter(p -> p.getId().equals(id))
                 .findFirst();
+        var status = HttpStatus.NOT_FOUND;
         if (maybePost.isPresent()) {
             var post = maybePost.get();
             post.setId(data.getId());
             post.setTitle(data.getTitle());
             post.setBody(data.getBody());
-            return ResponseEntity.ok().body(maybePost);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            status = HttpStatus.OK;
         }
+        return ResponseEntity.status(status).body(data);
     }
     // END
 
